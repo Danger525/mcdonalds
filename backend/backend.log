@@ -1307,3 +1307,6 @@ Starting Flask server...
 127.0.0.1 - - [01/Feb/2026 17:13:43] "GET /api/orders/8 HTTP/1.1" 200 -
 127.0.0.1 - - [01/Feb/2026 17:14:42] "GET /api/orders/8 HTTP/1.1" 200 -
 127.0.0.1 - - [01/Feb/2026 17:15:43] "GET /api/orders/8 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Feb/2026 17:16:43] "GET /api/orders/8 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Feb/2026 17:17:42] "GET /api/orders/8 HTTP/1.1" 200 -
+127.0.0.1 - - [01/Feb/2026 17:18:43] "GET /api/orders/8 HTTP/1.1" 200 -
