@@ -14,13 +14,6 @@
         {
             "src": "/api/(.*)",
             "dest": "backend/run.py"
-        },
-        {
-            "handle": "filesystem"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "frontend/$1"
         }
     ]
 }
