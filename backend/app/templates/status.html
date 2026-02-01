@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Status</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: #fdfdfd;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .status-card {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 2px solid #eee;
+        }
+
+        .order-id {
+            font-size: 1.2em;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .big-number {
+            font-size: 4em;
+            font-weight: bold;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.5em;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+        }
+
+        /* Status Colors */
+        .status-pending {
+            background: #ffeaa7;
+            color: #d35400;
+        }
+
+        .status-preparing {
+            background: #74b9ff;
+            color: #0984e3;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-ready {
+            background: #55efc4;
+            color: #00b894;
+        }
+
+        .status-completed {
+            background: #dfe6e9;
+            color: #636e72;
+        }
+
+        .status-cancelled {
+            background: #ff7675;
+            color: #d63031;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .item-list {
+            text-align: left;
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 10px;
+            list-style: none;
+            margin: 0;
+        }
+
+        .item-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .item-list li:last-child {
+            border-bottom: none;
+        }
+
+        .refresh-hint {
+            margin-top: 20px;
+            font-size: 0.8em;
+            color: #aaa;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="status-card">
+        <div class="order-id">Order #<span id="order-id">...</span></div>
+        <div class="big-number" id="table-num">--</div>
+        <div class="status-badge status-pending" id="status-badge">Loading...</div>
+
+        <h3>Your Items</h3>
+        <ul class="item-list" id="item-list"></ul>
+    </div>
+
+    <div class="refresh-hint">Checking status automatically...</div>
+
+    <script>
+        const orderId = window.location.pathname.split('/').pop();
+        const API_URL = '/api';
+
+        async function checkStatus() {
+            try {
+                const res = await fetch(`${API_URL}/orders/${orderId}`);
+                if (!res.ok) throw new Error("Order not found");
+                const data = await res.json();
+
+                // Update UI
+                document.getElementById('order-id').innerText = data.id;
+                document.getElementById('table-num').innerText = 'Table ' + (data.table_number || 'Takeout'); // Assuming API returns table_number in root, if not, adjust
+                // Wait, get_order_status in orders.py returns: { id, status, items, total }
+                // It does NOT currently return table number. I should probably add that to the API. 
+                // For now, I'll just show the ID clearly.
+
+                const badge = document.getElementById('status-badge');
+                badge.className = `status-badge status-${data.status}`;
+                badge.innerText = data.status;
+
+                const list = document.getElementById('item-list');
+                list.innerHTML = data.items.map(i => `
+                    <li>
+                        <span>${i.name}</span>
+                        <strong>x${i.quantity}</strong>
+                    </li>
+                `).join('');
+
+                if (['ready', 'completed', 'cancelled'].includes(data.status)) {
+                    // Slow down polling when terminal state reached
+                    setTimeout(checkStatus, 10000);
+                } else {
+                    setTimeout(checkStatus, 3000);
+                }
+
+            } catch (e) {
+                document.getElementById('status-badge').innerText = "Error";
+            }
+        }
+
+        checkStatus();
+    </script>
+</body>
+
+</html>

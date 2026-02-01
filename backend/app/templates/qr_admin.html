@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>QR Manager</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .qr-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        .qr-card img {
+            width: 150px;
+            height: 150px;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+            }
+
+            .qr-card {
+                break-inside: avoid;
+                border: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Table QR Codes 📱</h1>
+    <p class="no-print">Print this page to put on tables.</p>
+    <div class="qr-grid">
+        <!-- Generate 10 tables -->
+        <script>
+            for (let i = 1; i <= 10; i++) {
+                document.write(`
+                    <div class="qr-card">
+                        <h3>Table ${i}</h3>
+                        <img src="/api/admin/qr/${i}" alt="QR Table ${i}">
+                        <p>Scan to Order</p>
+                    </div>
+                `);
+            }
+        </script>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .status-btn {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Admin Dashboard 👨‍🍳</h1>
+    <div id="stats">Loading stats...</div>
+
+    <h2>Active Orders</h2>
+    <table id="orders-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Table</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        const API_URL = '/api';
+        let token = localStorage.getItem('token');
+
+        async function login() {
+            // Hardcoded admin login for demo (In real app, show login form)
+            if (!token) {
+                const res = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'admin', password: 'password' }) // Assumes admin exists
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    token = data.access_token;
+                    localStorage.setItem('token', token);
+                } else {
+                    alert('Login failed. Ensure admin user exists.');
+                }
+            }
+            loadDashboard();
+        }
+
+        async function loadDashboard() {
+            const headers = { 'Authorization': `Bearer ${token}` };
+
+            // Stats
+            const statsRes = await fetch(`${API_URL}/admin/stats`, { headers });
+            const stats = await statsRes.json();
+            document.getElementById('stats').innerHTML = `
+                <p>Total Orders: ${stats.total_orders} | Revenue: $${stats.total_sales || 0}</p>
+            `;
+
+            // Orders
+            const ordersRes = await fetch(`${API_URL}/admin/orders`, { headers });
+            const orders = await ordersRes.json();
+            document.getElementById('orders-table').querySelector('tbody').innerHTML = orders.map(o => `
+                <tr>
+                    <td>${o.id}</td>
+                    <td>${o.table}</td>
+                    <td>${o.status}</td>
+                    <td>$${o.total}</td>
+                    <td>
+                        <button onclick="updateStatus(${o.id}, 'preparing')">Prepare</button>
+                        <button onclick="updateStatus(${o.id}, 'ready')">Ready</button>
+                        <button onclick="updateStatus(${o.id}, 'completed')">Complete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function updateStatus(id, status) {
+            await fetch(`${API_URL}/orders/${id}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ status })
+            });
+            loadDashboard();
+        }
+
+        login();
+    </script>
+</body>
+
+</html>

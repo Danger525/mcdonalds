@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>McMenu Kiosk</title>
+    <style>
+        :root {
+            --mc-yellow: #ffbc0d;
+            --mc-red: #db0007;
+            --dark-bg: #222;
+            --text-color: #333;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Speedee', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background: #fafafa;
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar layout */
+        .sidebar {
+            width: 250px;
+            background: white;
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--mc-red);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo span {
+            font-size: 40px;
+            margin-right: 10px;
+            color: var(--mc-yellow);
+        }
+
+        .category-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: none;
+            background: none;
+            text-align: left;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: 0.2s;
+            color: #555;
+        }
+
+        .category-btn.active {
+            background: var(--mc-yellow);
+            color: black;
+        }
+
+        .category-btn:hover:not(.active) {
+            background: #eee;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #f4f4f4;
+        }
+
+        .hero-banner {
+            background: var(--mc-red);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .hero-banner h1 {
+            margin: 0;
+            font-size: 3em;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .menu-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
+
+        .menu-card h3 {
+            margin: 10px 0 5px;
+            font-size: 1.2em;
+        }
+
+        .menu-card p {
+            font-size: 0.9em;
+            color: #777;
+            margin-bottom: 15px;
+            min-height: 40px;
+        }
+
+        .menu-card .price {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: var(--mc-red);
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .add-btn {
+            background: var(--mc-yellow);
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 80%;
+            transition: 0.2s;
+        }
+
+        .add-btn:hover {
+            transform: scale(1.05);
+            background: #f0b000;
+        }
+
+        /* Cart Sidebar */
+        .cart-sidebar {
+            width: 350px;
+            background: white;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .cart-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f9f9f9;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-title {
+            font-weight: bold;
+        }
+
+        .cart-item-price {
+            color: #777;
+            font-size: 0.9em;
+        }
+
+        .qty-controls button {
+            width: 25px;
+            height: 25px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .qty-controls span {
+            margin: 0 8px;
+            font-weight: bold;
+        }
+
+        .cart-footer {
+            margin-top: 20px;
+        }
+
+        .total-price {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            background: var(--mc-red);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .checkout-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            width: 80%;
+            max-width: 400px;
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .success-icon {
+            font-size: 60px;
+            color: #2ecc71;
+            margin-bottom: 20px;
+        }
+
+        .order-id {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--mc-red);
+            margin: 20px 0;
+        }
+
+        .close-btn {
+            background: #333;
+            color: white;
+            padding: 10px 30px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1em;
+        }
+
+        /* Images placeholder style */
+        .img-placeholder {
+            width: 100%;
+            height: 150px;
+            background: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: #aaa;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+                overflow-y: auto;
+                height: auto;
+            }
+
+            .sidebar {
+                width: 100%;
+                overflow-x: auto;
+                flex-direction: row;
+                padding: 10px;
+            }
+
+            .category-btn {
+                width: auto;
+                margin: 0 10px;
+                white-space: nowrap;
+            }
+
+            .cart-sidebar {
+                width: 100%;
+                height: 300px;
+            }
+
+            .main-content {
+                overflow: visible;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar Categories -->
+    <div class="sidebar">
+        <div class="logo"><span>M</span> Kiosk <small id="table-display"></small></div>
+        <div id="category-list">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <!-- Main Menu Area -->
+    <div class="main-content">
+        <div class="hero-banner">
+            <h1>I'm lovin' it</h1>
+            <p>Order your favorites now!</p>
+        </div>
+        <div class="menu-grid" id="menu-grid">
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px; font-size: 1.5em; color: #888;">
+                Loading Menu... 🍔
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Cart Sidebar -->
+    <div class="cart-sidebar">
+        <div class="cart-header">My Order</div>
+        <div class="cart-items" id="cart-items">
+            <!-- Cart Items -->
+            <div style="text-align: center; color: #999; margin-top: 50px;">
+                Start adding yummy items! 🍔
+            </div>
+        </div>
+        <div class="cart-footer">
+            <div class="total-price">
+                <span>Total</span>
+                <span id="cart-total">$0.00</span>
+            </div>
+            <button class="checkout-btn" onclick="placeOrder()" id="checkout-btn" disabled>Done / Pay</button>
+        </div>
+    </div>
+
+    <!-- Order Success Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="success-icon">✓</div>
+            <h2>Order Placed!</h2>
+            <p>Please wait for your number</p>
+            <div class="order-id" id="modal-order-id">#000</div>
+            <button class="close-btn" onclick="closeModal()">Start New Order</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api';
+        let allItems = [];
+        let cart = [];
+        let categories = [];
+
+        // Read table from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const tableNumber = urlParams.get('table') || 0;
+
+        if (tableNumber > 0) {
+            document.getElementById('table-display').innerText = `(Table ${tableNumber})`;
+        }
+
+        // Fetch Menu
+        async function init() {
+            try {
+                const res = await fetch(`${API_URL}/menu/`);
+                allItems = await res.json();
+                extractCategories();
+                renderCategories();
+                renderMenu(categories[0]); // Default to first category
+            } catch (e) {
+                console.error("Failed to load menu", e);
+                document.getElementById('menu-grid').innerHTML = '<p>Service temporarily unavailable.</p>';
+            }
+        }
+
+        function extractCategories() {
+            const cats = new Set(allItems.map(i => i.category));
+            categories = Array.from(cats);
+        }
+
+        function renderCategories() {
+            const container = document.getElementById('category-list');
+            container.innerHTML = categories.map((cat, index) => `
+                <button class="category-btn ${index === 0 ? 'active' : ''}" onclick="filterCategory('${cat}', this)">
+                    ${cat}
+                </button>
+            `).join('');
+        }
+
+        function filterCategory(category, btn) {
+            // Update active state
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderMenu(category);
+        }
+
+        function renderMenu(category) {
+            const container = document.getElementById('menu-grid');
+            const filtered = allItems.filter(i => i.category === category);
+
+            container.innerHTML = filtered.map(item => `
+                <div class="menu-card">
+                    <div class="img-placeholder">${item.name} Img</div>
+                    <!--<img src="${item.image_url || 'placeholder.png'}" alt="${item.name}"> -->
+                    <h3>${item.name}</h3>
+                    <p>${item.description}</p>
+                    <span class="price">$${item.price.toFixed(2)}</span>
+                    <button class="add-btn" onclick="addToCart(${item.id})">Add to Order</button>
+                </div>
+            `).join('');
+        }
+
+        function addToCart(id) {
+            const item = allItems.find(i => i.id === id);
+            const existing = cart.find(i => i.menu_item_id === id);
+
+            if (existing) {
+                existing.quantity++;
+            } else {
+                cart.push({ menu_item_id: id, quantity: 1, name: item.name, price: item.price });
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cart-items');
+            const totalEl = document.getElementById('cart-total');
+            const checkoutBtn = document.getElementById('checkout-btn');
+
+            if (cart.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #999; margin-top: 50px;">Start adding yummy items! 🍔</div>';
+                totalEl.innerText = '$0.00';
+                checkoutBtn.disabled = true;
+                return;
+            }
+
+            let total = 0;
+            container.innerHTML = cart.map(item => {
+                total += item.price * item.quantity;
+                return `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <div class="cart-item-title">${item.name}</div>
+                            <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                        </div>
+                        <div class="qty-controls">
+                            <button onclick="changeQty(${item.menu_item_id}, -1)">-</button>
+                            <span>${item.quantity}</span>
+                            <button onclick="changeQty(${item.menu_item_id}, 1)">+</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            totalEl.innerText = '$' + total.toFixed(2);
+            checkoutBtn.disabled = false;
+        }
+
+        function changeQty(id, delta) {
+            const item = cart.find(i => i.menu_item_id === id);
+            if (!item) return;
+
+            item.quantity += delta;
+            if (item.quantity <= 0) {
+                cart = cart.filter(i => i.menu_item_id !== id);
+            }
+            updateCartUI();
+        }
+
+        async function placeOrder() {
+            try {
+                // Table Number already defined globally above
+                const payload = { table_number: tableNumber || 99, items: cart };
+
+                const res = await fetch(`${API_URL}/orders/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    // Redirect to status page instead of showing modal
+                    window.location.href = `/status/${data.order_id}`;
+                } else {
+                    alert("Error: " + data.message);
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Connection failed");
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('orderModal').classList.remove('active');
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
