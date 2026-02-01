@@ -38,13 +38,20 @@ export default function CartPage() {
                 }))
             };
 
+
             const res = await api.post('/orders/', orderData);
+            console.log("Order Response:", res.data); // DEBUG
             showNotification(`Order placed! Order Number: ${res.data.order_number}`);
             clearCart();
+
+            const redirectUrl = `/orders/${res.data.order_id}`;
+            console.log("Redirecting to:", redirectUrl); // DEBUG
+
             // Delay redirect slightly to show toast
             setTimeout(() => {
-                router.push(`/orders/${res.data.order_id}`);
-            }, 1500);
+                router.push(redirectUrl);
+            }, 1000);
+
         } catch (err) {
             console.error(err);
             showNotification("Failed to place order. Ensure you are logged in if required.");
