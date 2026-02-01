@@ -45,21 +45,23 @@ export default function OrderStatusPage() {
                 {order.status}
             </div>
 
+
             <div className="bg-white p-6 rounded-lg shadow-lg dark:bg-gray-800 text-left">
                 <h2 className="text-xl font-semibold mb-4 border-b pb-2">Order Details</h2>
                 <div className="space-y-3 mb-6">
                     {order.items.map((item: any, idx: number) => (
                         <div key={idx} className="flex justify-between">
                             <span>{item.quantity}x {item.name}</span>
-                            <span>${item.total.toFixed(2)}</span>
+                            <span>₹{item.total.toFixed(2)}</span>
                         </div>
                     ))}
                 </div>
                 <div className="flex justify-between text-xl font-bold border-t pt-4">
                     <span>Total</span>
-                    <span>${order.total.toFixed(2)}</span>
+                    <span>₹{order.total.toFixed(2)}</span>
                 </div>
             </div>
+
 
             <p className="mt-8 text-gray-500">
                 This page will automatically update when your order status changes.
